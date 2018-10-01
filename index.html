@@ -1,1 +1,66 @@
-Empty
+ <!DOCTYPE html>
+<html>
+
+<head>
+	<title>AMQ Data Viewer</title>
+	<meta charset='utf-8'/>
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="icon" href="icons/abr.png">
+	<script src='js/amq_viewer.js'></script>
+</head>
+
+<body>
+	<div id="top-menu">
+		<a onclick="scroll_to_top()">Jump to Top</a>
+		<a href="https://animemusicquiz.com/" target="_blank">Anime Music Quiz</a>
+		<div id="sorting-container">
+			<span>Sort by:</span>
+			<select id="sort-select" onchange="resort(this.value)" autocomplete="off">
+				<option value="anime" selected>Anime</option>
+				<option value="accuracy">Accuracy</option>
+				<option value="appearances">Appearances</option>
+			</select>
+		</div>
+	</div>
+	<div id="info-listing">
+	</div>
+</body>
+
+<div id="templates" style="display: none;">
+	<div id="info-template" class="full-info-container">
+		<div class="info-header">
+			<span class="anime-name"></span>
+			<span class="song-type"></span>
+		</div>
+		<div class="info-the-rest">
+			<table>
+				<tr>
+					<td>Song Name:</td>
+					<td class="song-name"></td>
+				</tr>
+				<tr>
+					<td>Artist:</td>
+					<td class="song-artist"></td>
+				</tr>
+				<tr>
+					<td>Song Links:</td>
+					<td class="song-links"></td>
+				</tr>
+				<tr>
+					<td>Accuracy:</td>
+					<td class="song-stats"></td>
+				</tr>
+				<tr>
+					<td>Alternatives:</td>
+					<td class="song-alternatives"></td>
+				</tr>
+				<tr>
+					<td>Incorrect:</td>
+					<td class="song-incorrect"></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>
+
+</html>
