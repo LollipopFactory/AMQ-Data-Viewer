@@ -1,4 +1,15 @@
 /*-----------------------------------------------------------------------------
+                                 INTRO
+-----------------------------------------------------------------------------*/
+/*
+This file pretty much constructs the entire page based on the json in the data
+folder. On a more ideal webpage, the server would do this computation and
+simply serve the built page. However, this was initially built (and still works
+as) a standalone page that can be run locally with your own data.
+*/
+
+
+/*-----------------------------------------------------------------------------
                              UTIL FUNTIONS
 -----------------------------------------------------------------------------*/
 
@@ -410,11 +421,28 @@ const resort = function(value) {
 	localStorage.setItem('sorting-method', value);
 };
 //https://www.w3schools.com/howto/howto_js_scroll_to_top.asp
-let scroll_to_top = function () {
+const scroll_to_top = function() {
 	document.body.scrollTop = 0; // For Safari
 	document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
 };
-
+//show the accuracy row for all song listings
+const show_accuracies = function() {
+	document.getElementById('info-listing').className = "accuracy-shown";
+};
+//show the accuracy row for all song listings
+const hide_accuracies = function() {
+	document.getElementById('info-listing').className = "accuracy-hidden";
+};
+//
+const toggle_accuracy = function(cb) {
+	localStorage.setItem('accuracy-shown', JSON.stringify(cb.checked));
+	if(cb.checked) {
+		show_accuracies();
+	}
+	else {
+		hide_accuracies();
+	}
+};
 
 /*-----------------------------------------------------------------------------
                                  MAIN
@@ -436,7 +464,7 @@ let filenames = await load_json('data/filenames.json');
 //load and read the data
 await Promise.all( filenames.map( record_name_to_data ) );
 
-//get sorting method
+//get and apply stored sorting method
 let sorting_method = localStorage.getItem('sorting-method');
 if(localStorage.getItem('sorting-method')) {
 	document.getElementById('sort-select').value = sorting_method;
@@ -444,6 +472,21 @@ if(localStorage.getItem('sorting-method')) {
 else {
 	sorting_method = 'anime';
 	localStorage.setItem('sorting-method', sorting_method);
+}
+//get and apply stored accuracy display option
+let accuracy_shown = localStorage.getItem('accuracy-shown');
+if(accuracy_shown) {
+	const cb = document.getElementById("cb-accuracy");
+	cb.checked = JSON.parse(accuracy_shown);
+	if(cb.checked) {
+		show_accuracies();
+	}
+	else {
+		hide_accuracies();
+	}
+}
+else {
+	localStorage.setItem('accuracy-shown', false);
 }
 //sort the data
 const sorted_data = Array.from(data.values()).sort( sorting_methods[sorting_method] );

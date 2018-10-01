@@ -11,8 +11,10 @@
 
 <body>
 	<div id="top-menu">
-		<a onclick="scroll_to_top()">Jump to Top</a>
+		<a href="about.html">About</a>
 		<a href="https://animemusicquiz.com/" target="_blank">Anime Music Quiz</a>
+		<a onclick="scroll_to_top()">Jump to Top</a>
+		<label>Show Accuracies: <input id='cb-accuracy' type='checkbox' onclick='toggle_accuracy(this);'></label>
 		<div id="sorting-container">
 			<span>Sort by:</span>
 			<select id="sort-select" onchange="resort(this.value)" autocomplete="off">
@@ -22,7 +24,7 @@
 			</select>
 		</div>
 	</div>
-	<div id="info-listing">
+	<div id="info-listing" class="accuracy-hidden">
 	</div>
 </body>
 
@@ -46,7 +48,7 @@
 					<td>Song Links:</td>
 					<td class="song-links"></td>
 				</tr>
-				<tr>
+				<tr class="accuracy-row">
 					<td>Accuracy:</td>
 					<td class="song-stats"></td>
 				</tr>

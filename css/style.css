@@ -21,6 +21,7 @@ body {
 }
 
 #top-menu>a,
+#top-menu>label,
 #top-menu>div {
 	padding: 4px 16px;
 }
@@ -48,14 +49,14 @@ body {
 	background-color: #333333;
 }
 
-#info-listing a:link {
+a:link {
 	color: #60C0F0;
 	transition: .2s;
 }
-#info-listing a:visited {
+a:visited {
 	color: #60C0F0;
 }
-#info-listing a:hover {
+a:hover {
 	color: #90F0FF;
 }
 
@@ -102,6 +103,15 @@ body {
 	flex-direction: column;
 }
 
+.accuracy-hidden .accuracy-row {
+	display: none;
+}
+
+.accuracy-shown .accuracy-row {
+	display: table-row;
+}
+
+
 .song-alternatives {
 	display: flex;
 	flex-direction: column;
@@ -123,4 +133,24 @@ body {
 	font-weight: bold;
 	font-size: 18px;
 	color: #9b8fcc; /* still not happy with this color */
+}
+
+
+
+
+#about-page { 
+	margin-top: 4%;
+	margin-bottom: 2%;
+	width: 65%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#about-page h2 {
+	text-align: center;
+	text-decoration: underline;
+}
+
+#about-page p {
+	font-size: 18px;
 }

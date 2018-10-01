@@ -1,0 +1,35 @@
+ <!DOCTYPE html>
+<html>
+
+<head>
+	<title>AMQ Data Viewer</title>
+	<meta charset='utf-8'/>
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="icon" href="icons/abr.png">
+</head>
+
+<body>
+	<div id="top-menu">
+		<a href="index.html">Back to Viewer</a>
+		<a href="https://animemusicquiz.com/" target="_blank">Anime Music Quiz</a>
+	</div>
+	<div id="about-page">
+		<h2>
+			About
+		</h2>
+		<p>
+There is a (somewhat jenky) script that lets players of <a href="https://animemusicquiz.com/" target="_blank">Anime Music Quiz</a> record the data from matches they play. It can be found <a href="https://github.com/LollipopFactory/AMQ-Data-Viewer" target="_blank">here</a>. This webpage merges data from any number of recorded sessions, and gives a more convenient way of viewing it.
+		</p>
+		<p>
+The page lists each unique song that was encountered. It gives the anime name, the song's type (opening, ending, or insert), the song's name and artist, and all media links that have been collected for the song (there may be multiple links for different quality options). The main title of the anime will be based on the "Show Names" (English or Romaji) option that was in place during recording. The same option should be used for all sessions, or else the same song can be listed twice under the English and Romaji names.
+		</p>
+		<p>
+Each listed song can also give the accuracy of the players in answering that song correctly. Since this statistic is based on a fairly small sample of plays with a relatively small sample of players, it should generally be taken with a grain of salt. The accuracy is really only relevant to the group of players that played during the recorded sessions. For others, the statistic is at best unhelpful, and at worst misleading (don't expect it to match the difficulty of the song in game). As such, the accuracies are hidden by default.
+		</p>
+		<p>
+Finally, each song has a list of known valid alternative answers, and a list of incorrect answers. The known alternatives are on a per-song basis (instead of a per-anime basis) because some songs play in multiple seasons, or even multiple different anime. The only incorrect answers that are shown by default are answers which are known to be valid for some other song. The other garbage answers can be still be seen, but are hidden by default. Note that hidden incorrect answers may actually be valid answers that have not been seen yet.
+		</p>
+	</div>
+</body>
+
+</html>
