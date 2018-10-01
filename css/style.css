@@ -98,6 +98,10 @@ a:hover {
 	color: #C0C0C0;;
 }
 
+.links-row a {
+	margin-right: 3px;
+}
+
 .song-links {
 	display: flex;
 	flex-direction: column;

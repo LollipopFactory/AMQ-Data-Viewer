@@ -193,17 +193,19 @@ const update_round_data = function( round_data, song_list ) {
 
 				//do the same for incorrect guesses
 				const wrong_names = guesses.filter( (_, i) => !corrects[i] );
-				//get each different current known alternative name (ignoring captilization)
+				//get each different current known incorrect names (ignoring captilization)
 				const unique_wrongs = new Set([]);
 				for( let name of song_data.wrongGuesses ) {
 					unique_wrongs.add( name.toLowerCase() );
 				}
 				const wrong_size = unique_wrongs.size;
-				//add any new alternatives
+				//add any new incorrect names
 				for( let name of wrong_names ) {
-					unique_wrongs.add(name.toLowerCase());
+					if( name !== "..." && !(/^\s*$/.test(name))) {
+						unique_wrongs.add(name.toLowerCase());
+					}
 				}
-				//if we added any alternatives, update the song data
+				//if we added any incorrect names, update the song data
 				if( wrong_size < unique_wrongs.size ) {
 					const formated_alternatives = new Set();
 					for( let name of unique_wrongs ) {
@@ -303,11 +305,38 @@ const add_song_info_node = function( song_data ) {
 	const add_song_link = function( url ) {
 		try {
 			const row = info.getElementsByClassName('song-links')[0];
+			const linkLine = document.createElement("span");
+
 			const anchor = document.createElement('A');
 			anchor.href = url;
 			anchor.target = "_blank";
 			anchor.innerHTML = url;
-			row.appendChild(anchor);
+			
+			//linkvii wrote the video embed stuff
+			linkLine.appendChild(anchor);
+
+			const play = document.createElement('button');
+			play.innerHTML = "►";
+
+			linkLine.appendChild(play);
+			
+			const vid = document.createElement("video");
+			vid.setAttribute("width", "90%")
+			vid.controls = "true";
+			vid.preload = "none";
+			vid.style.display = "none";
+			
+			const sr = document.createElement("source");
+			sr.src = url;
+			vid.appendChild(sr);
+
+			play.vid = vid;
+			play.onclick = toggle_video;
+			
+			
+			row.appendChild(linkLine);
+			row.appendChild(vid);
+
 		} catch(err) {
 			console.error(err);
 		}
@@ -328,22 +357,6 @@ const add_song_info_node = function( song_data ) {
 		}
 		stat_elem.innerHTML += ", (appeared " + occurances + " time" + (occurances !== 1 ? "s" : "") + ")";
 	};
-	const show_more_incorrect = function() {
-		const incorrects = this.parentNode;
-		for( let hidden of incorrects.getElementsByClassName('hidden-incorrect') ) {
-			hidden.style.display = 'initial';
-		}
-		this.onclick = show_less_incorrect;
-		this.innerHTML = (this.numShown > 0) ? "Show Less" : "Hide";
-	};
-	const show_less_incorrect = function() {
-		const incorrects = this.parentNode;
-		for( let hidden of incorrects.getElementsByClassName('hidden-incorrect') ) {
-			hidden.style.display = 'none';
-		}
-		this.onclick = show_more_incorrect;
-		this.innerHTML = (this.numShown > 0) ? "Show More" : "Show";
-	};
 	const list_alternatives = function( class_name, alternatives ) {
 		const row = info.getElementsByClassName(class_name)[0];
 		const add_alternative_row = function( name, should_hide ) {
@@ -351,7 +364,7 @@ const add_song_info_node = function( song_data ) {
 			if( should_hide ) {
 				span.className = 'hidden-incorrect';
 			}
-			span.innerHTML = name;
+			span.appendChild(document.createTextNode(name));
 			row.appendChild(span);
 		};
 		//list possible known alternative answers
@@ -404,6 +417,36 @@ const add_song_info_node = function( song_data ) {
 	info_list.appendChild(info);
 };
 
+const toggle_video = function() {
+	const vid = this.vid;
+	const disp = window.getComputedStyle(vid).getPropertyValue("display");
+	const visible = disp !== "none";
+	if (visible){
+		this.innerHTML = "►";
+		vid.style.display = "none";
+		vid.pause();
+	}else{
+		vid.style.display = "inline";
+		this.innerHTML = "X";
+		vid.play();
+	}
+};
+const show_more_incorrect = function() {
+	const incorrects = this.parentNode;
+	for( let hidden of incorrects.getElementsByClassName('hidden-incorrect') ) {
+		hidden.style.display = 'initial';
+	}
+	this.onclick = show_less_incorrect;
+	this.innerHTML = (this.numShown > 0) ? "Show Less" : "Hide";
+};
+const show_less_incorrect = function() {
+	const incorrects = this.parentNode;
+	for( let hidden of incorrects.getElementsByClassName('hidden-incorrect') ) {
+		hidden.style.display = 'none';
+	}
+	this.onclick = show_more_incorrect;
+	this.innerHTML = (this.numShown > 0) ? "Show More" : "Show";
+};
 
 /*-----------------------------------------------------------------------------
                            EVENT CALLBACKS
@@ -457,6 +500,7 @@ const record_name_to_data = async function(name) {
 	const json_data = await load_json(path);
 	return merge_in_json(json_data);
 };
+
 
 (async function() {
 //get the list of datafiles
