@@ -7,7 +7,7 @@ The main description of this webpage can be found [on the about page](https://lo
 `tools/amq.js` allows you to record data of AMQ sessions. It is fairly awkward to use, but the process is as follows:
 
 * Copy-Paste the entirety of `tools/amq.js` into your browser's console after loading the AMQ page.
-* Run `amq.start()` in the console after starting a game.
+* Run `amq.start()` in the console after starting a game. You only need to do this once per session, not once per round.
 * Once you want the data, press the \`~ key on the keyboard. This will copy the data into your clipboard so you can paste it into a text editor.
 * Save that as a `.json`.
 
