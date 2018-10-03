@@ -246,7 +246,7 @@ const song_list_compare = function( data_a, data_b ) {
 			return neq_ord(index_a, index_b);
 		}
 		if( type_a[1] !== type_b[1] ) {
-			return neq_ord(type_a[1], type_b[1]);
+			return neq_ord(parseInt(type_a[1]), parseInt(type_b[1]));
 		}
 	}
 	if( data_a.songName !== data_b.songName ) {
