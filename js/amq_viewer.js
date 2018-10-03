@@ -230,55 +230,82 @@ const merge_in_json = function( new_data ) {
 /*-----------------------------------------------------------------------------
                        COMPARISON FUNCTIONS
 -----------------------------------------------------------------------------*/
-const song_list_compare = function( data_a, data_b ) {
-	const neq_ord = (a,b) => (a < b) ? -1 : 1;
-
-	if( data_a.animeName !== data_b.animeName ) {
-		return neq_ord(data_a.animeName, data_b.animeName);
-	}
-	if( data_a.animeType !== data_b.animeType ) {
-		const ordering = ["Opening", "Ending", "Insert"];
-		const type_a = data_a.animeType.split(' ');
-		const type_b = data_b.animeType.split(' ');
-		const index_a = ordering.indexOf(type_a[0]);
-		const index_b = ordering.indexOf(type_b[0]);
-		if( index_a !== index_b ) {
-			return neq_ord(index_a, index_b);
+//takes a list of comparison functions, and returns a new comparison function
+//the returned function will apply the listed functions in order
+//until one of them is non-zero, and will return that value
+//if all comparisons return 0, the returned function will return 0
+const create_comp = function( comps ) {
+	return function(data_a, data_b) {
+		for(let comp of comps) {
+			const mag = comp(data_a, data_b);
+			if(mag !== 0) {
+				return mag;
+			}
 		}
-		if( type_a[1] !== type_b[1] ) {
-			return neq_ord(parseInt(type_a[1]), parseInt(type_b[1]));
-		}
-	}
-	if( data_a.songName !== data_b.songName ) {
-		return neq_ord(data_a.songName, data_b.songName);
-	}
-	if( data_a.artistName !== data_b.artistName ) {
-		return neq_ord(data_a.artistName, data_b.artistName);
-	}
-	return 0;
+		return 0;
+	};
 };
 
-const song_accuracy_compare = function( data_a, data_b ) {
-	if(data_a.outOf === 0 && data_b.outOf === 0) {
-		return 0;
-	}
+//creates a function that returns the requested property of the data
+const by_property = (prop_name) => ((d) => d[prop_name]);
+//returns comparison functions that compares the data value returned by the given function
+const ord_comp = function( ord ) {
+	return function( retriever ) {
+		return function(data_a, data_b) {
+			const val_a = retriever(data_a);
+			const val_b = retriever(data_b);
+			if( val_a !== val_b ) {
+				return ord(val_a, val_b);
+			}
+			return 0;
+		};
+	};
+};
+//two ordering functions
+const gt_ord = (a,b) => (a > b) ? 1 : -1;
+const lt_ord = (a,b) => (a < b) ? 1 : -1;
+//use those with the above function to get two main comparison components:
+const gt_comp = ord_comp(gt_ord);
+const lt_comp = ord_comp(lt_ord);
+
+//a few specific comparisons
+const comp_by_type = function(data_a, data_b) {
+	const ordering = ["Opening", "Ending", "Insert"];
+	const type_a = data_a.animeType.split(' ');
+	const type_b = data_b.animeType.split(' ');
+	const by_type = (t) => ordering.indexOf(t[0]);
+	const by_order = (t) => parseInt(t[1]);
+	return create_comp([
+		gt_comp( by_type ),
+		gt_comp( by_order ),
+	])(type_a, type_b);
+};
+const outOf_check = function(data_a, data_b) {
 	if(data_a.outOf === 0) return 1;
 	if(data_b.outOf === 0) return -1;
-	if(data_a.correct / data_a.outOf !== data_b.correct / data_b.outOf) {
-		return (data_a.correct / data_a.outOf > data_b.correct / data_b.outOf) ? -1 : 1;
-	}
-	if(data_a.outOf !== data_b.outOf) {
-		return (data_a.outOf > data_b.outOf) ? -1 : 1;
-	}
-	return song_list_compare( data_a, data_b );
+	return 0;
 };
+const by_accuracy = (d) => (d.correct / d.outOf);
 
-const song_occurance_compare = function( data_a, data_b ) {
-	if(data_a.occurances !== data_b.occurances) {
-		return (data_a.occurances > data_b.occurances) ? -1 : 1;
-	}
-	return song_accuracy_compare( data_a, data_b );
-};
+//these are the main comparison functions
+const song_list_compare = create_comp( [
+	gt_comp( by_property('animeName') ),
+	comp_by_type,
+	gt_comp( by_property('songName') ),
+	gt_comp( by_property('artistName') ),
+]);
+
+const song_accuracy_compare = create_comp( [
+	outOf_check,
+	lt_comp( by_accuracy ),
+	lt_comp( by_property('outOf') ),
+	song_list_compare,
+]);
+
+const song_occurance_compare = create_comp( [
+	lt_comp( by_property('occurances') ),
+	song_accuracy_compare,
+]);
 
 const sorting_methods = {
 	anime: song_list_compare,
@@ -503,15 +530,14 @@ const record_name_to_data = async function(name) {
 
 
 (async function() {
-//get the list of datafiles
-let filenames = await load_json('data/filenames.json');
-//load and read the data
-await Promise.all( filenames.map( record_name_to_data ) );
 
 //get and apply stored sorting method
 let sorting_method = localStorage.getItem('sorting-method');
 if(localStorage.getItem('sorting-method')) {
-	document.getElementById('sort-select').value = sorting_method;
+	//tell the dom to set this value once it's ready to do so
+	build_dom.then( () =>
+		document.getElementById('sort-select').value = sorting_method
+	);
 }
 else {
 	sorting_method = 'anime';
@@ -520,18 +546,27 @@ else {
 //get and apply stored accuracy display option
 let accuracy_shown = localStorage.getItem('accuracy-shown');
 if(accuracy_shown) {
-	const cb = document.getElementById("cb-accuracy");
-	cb.checked = JSON.parse(accuracy_shown);
-	if(cb.checked) {
-		show_accuracies();
-	}
-	else {
-		hide_accuracies();
-	}
+	//tell the dom to set this value once it's ready to do so
+	build_dom.then( function() {
+		const cb = document.getElementById("cb-accuracy");
+		cb.checked = JSON.parse(accuracy_shown);
+		if(cb.checked) {
+			show_accuracies();
+		}
+		else {
+			hide_accuracies();
+		}
+	});
 }
 else {
 	localStorage.setItem('accuracy-shown', false);
 }
+
+//get the list of datafiles
+let filenames = await load_json('data/filenames.json');
+//load and read the data
+await Promise.all( filenames.map( record_name_to_data ) );
+
 //sort the data
 const sorted_data = Array.from(data.values()).sort( sorting_methods[sorting_method] );
 //make sure the dom is ready to be added to
