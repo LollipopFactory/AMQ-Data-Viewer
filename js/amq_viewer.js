@@ -316,11 +316,20 @@ const sorting_methods = {
 /*-----------------------------------------------------------------------------
                         HTML BUILDING
 -----------------------------------------------------------------------------*/
+const summary = { songs: [], urls: {} };
+let summary_id = 0;
 const add_song_info_node = function( song_data ) {
 	const info_list = document.getElementById('info-listing');
 	const template = document.getElementById('info-template');
 	const info = template.cloneNode(true); //pass true to do a deep copy
 	info.id = "";
+
+	//make the summary for this song
+	const mysummary = {
+		correct: [song_data.animeName],
+		incorrect: [],
+		accuracy: 0.0,
+	};
 
 	const set_info_text = function(class_name, text) {
 		try {
@@ -378,6 +387,10 @@ const add_song_info_node = function( song_data ) {
 			const rgb = hsv_to_rgb(h, .6, .8);
 			const stat_color = rgba_to_string(rgb.r, rgb.b, rgb.g);
 			stat_elem.innerHTML = "<span style='color: " + stat_color + ";'>" + stats_string + "</span>";
+			//update summary
+			if (percent > 0.0) {
+				mysummary.accuracy = percent;
+			}
 		}
 		else {
 			stat_elem.innerHTML = "– [0/0]";
@@ -405,6 +418,13 @@ const add_song_info_node = function( song_data ) {
 				}
 				else {
 					num_shown++;
+					//update summary
+					if(class_name === 'song-incorrect') {
+						mysummary.incorrect.push(name);
+					}
+					else {
+						mysummary.correct.push(name);
+					}
 				}
 				add_alternative_row(name, should_hide);
 			}
@@ -433,6 +453,8 @@ const add_song_info_node = function( song_data ) {
 	//list possible known links
 	for(let url of song_data.videoLinks) {
 		add_song_link(url);
+		// map the url to this song's summary id
+		summary.urls[url] = summary_id;
 	}
 	//list possible alternatives and incorrect answers
 	list_alternatives( 'song-alternatives', song_data.alternativeNames);
@@ -442,6 +464,9 @@ const add_song_info_node = function( song_data ) {
 	info.song_data = song_data
 	//add the node to the page
 	info_list.appendChild(info);
+	//add the summary for this song
+	summary.songs[summary_id] = mysummary;
+	summary_id++;
 };
 
 const toggle_video = function() {
@@ -573,6 +598,10 @@ const sorted_data = Array.from(data.values()).sort( sorting_methods[sorting_meth
 await build_dom;
 //add the data to the page
 sorted_data.forEach( add_song_info_node );
+//create a downloadable summary
+const content = JSON.stringify(summary, null, 1);
+const file = new Blob([content], {type: 'text/plain'});
+document.getElementById('download-summary').href = URL.createObjectURL(file);
 
 
 })().catch( (e) => console.error(e) );
