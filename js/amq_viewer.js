@@ -328,7 +328,9 @@ const add_song_info_node = function( song_data ) {
 	const mysummary = {
 		correct: [song_data.animeName],
 		incorrect: [],
-		accuracy: 0.0,
+		num: 0,
+		denom: 0,
+		occurances: 0,
 	};
 
 	const set_info_text = function(class_name, text) {
@@ -388,9 +390,9 @@ const add_song_info_node = function( song_data ) {
 			const stat_color = rgba_to_string(rgb.r, rgb.b, rgb.g);
 			stat_elem.innerHTML = "<span style='color: " + stat_color + ";'>" + stats_string + "</span>";
 			//update summary
-			if (percent > 0.0) {
-				mysummary.accuracy = percent;
-			}
+			mysummary.num = num;
+			mysummary.denom = denom;
+			mysummary.occurances = occurances;
 		}
 		else {
 			stat_elem.innerHTML = "– [0/0]";
